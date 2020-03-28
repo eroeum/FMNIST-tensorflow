@@ -5,7 +5,7 @@ class Model(object):
     def __init__(self, proto=False, min_delta=0.001):
         self.proto = proto
         self.model = self.build_model()
-        self.model.compile(optimizer='adam',
+        self.model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=0.0001, decay=1e-6),
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
             metrics=['accuracy'])
         self.earlystop_callback = tf.keras.callbacks.EarlyStopping(
