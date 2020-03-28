@@ -1,6 +1,8 @@
 import numpy as np
 
-def format_df(df):
+def format_df(df, seed=None):
+    if(seed != None):
+        np.random.seed(seed)
     data = df.loc[:, df.columns != 'label'].to_numpy(dtype=np.uint8)
     labels = df['label'].to_numpy()
     splitter = lambda x: np.split(x, 28)
