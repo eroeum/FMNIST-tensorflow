@@ -13,9 +13,9 @@ def main(proto=False):
     test_images = reshape(test_images)
 
     model = Model(proto=proto)
-    model.run(train_images, train_labels, epochs=100)
+    model.run(train_images, train_labels, epochs=50)
     test_loss, test_acc = model.evaluate(test_images, test_labels)
     print("\nTest Accuracy:", test_acc)
 
 if __name__ == '__main__':
-    main()
+    main(True)
