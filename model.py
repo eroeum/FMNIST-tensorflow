@@ -2,11 +2,15 @@ import tensorflow as tf
 from tensorflow import keras
 
 class Model(object):
-    def __init__(self):
+    def __init__(self, proto=False, min_delta=0.001):
+        self.proto = proto
         self.model = self.build_model()
         self.model.compile(optimizer='adam',
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
             metrics=['accuracy'])
+        self.earlystop_callback = tf.keras.callbacks.EarlyStopping(
+            monitor='accuracy', min_delta=min_delta,
+            patience=1)
 
     @classmethod
     def build_model(self):
@@ -28,7 +32,11 @@ class Model(object):
         return model
 
     def run(self, predictors, targets, epochs=10):
-        self.model.fit(predictors, targets, epochs=epochs)
+        if(self.proto):
+            self.model.fit(predictors, targets,
+                epochs=epochs, callbacks=[self.earlystop_callback])
+        else:
+            self.model.fit(predictors, targets, epochs=epochs)
 
     def evaluate(self, predictors, targets, verbosity=2):
         loss, acc = self.model.evaluate(predictors, targets,

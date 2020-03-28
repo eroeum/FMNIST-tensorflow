@@ -2,11 +2,7 @@ from importer import import_csv, split_df
 from preprocess import format_df, reshape
 from model import Model
 
-DATA_SPLIT = 0.8
-BATCH_SIZE = 64
-N_EPOCHS   = 20
-
-def main():
+def main(proto=False):
     df = import_csv("/data/fashion-mnist_train.csv")
     train, test = split_df(df)
 
@@ -16,8 +12,8 @@ def main():
     train_images = reshape(train_images)
     test_images = reshape(test_images)
 
-    model = Model()
-    model.run(train_images, train_labels)
+    model = Model(proto=proto)
+    model.run(train_images, train_labels, epochs=100)
     test_loss, test_acc = model.evaluate(test_images, test_labels)
     print("\nTest Accuracy:", test_acc)
 
