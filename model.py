@@ -1,3 +1,4 @@
+from datetime import datetime
 import tensorflow as tf
 from tensorflow import keras
 from keras.preprocessing.image import ImageDataGenerator
@@ -5,13 +6,14 @@ from keras.preprocessing.image import ImageDataGenerator
 class Model(object):
     def __init__(self, proto=False, min_delta=0.001):
         self.proto = proto
+
         self.model = self.build_model()
         self.model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=0.0001, decay=1e-6),
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
             metrics=['accuracy'])
         self.earlystop_callback = tf.keras.callbacks.EarlyStopping(
             monitor='accuracy', min_delta=min_delta,
-            patience=1)
+            patience=5)
         self.datagen = ImageDataGenerator(
             featurewise_center=False,
             samplewise_center=False,
@@ -34,34 +36,67 @@ class Model(object):
             data_format=None,
             validation_split=0.0)
 
+        logdir="logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
+
 
     @classmethod
     def build_model(self):
         model = keras.Sequential([
+            keras.layers.Conv2D(16, (3, 3), padding='same', activation='relu'),
             keras.layers.BatchNormalization(),
-            keras.layers.Conv2D(64, (4, 4), padding='same', activation='relu'),
-            keras.layers.MaxPooling2D(pool_size=(2,2)),
-            keras.layers.Dropout(0.1),
-            keras.layers.Conv2D(64, (4, 4), padding='same', activation='relu'),
-            keras.layers.MaxPooling2D(pool_size=(2,2)),
-            keras.layers.Dropout(0.3),
+
+            keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu'),
+            keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+            keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+
+            keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+
+            keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+
+            keras.layers.Conv2D(64, (3, 3), padding='same', activation='relu'),
+            keras.layers.Conv2D(64, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+            keras.layers.Conv2D(64, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+
+            keras.layers.Conv2D(64, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+
+            keras.layers.Conv2D(64, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+
+            keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu'),
+            keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+            keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+
+            keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+
+            keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu'),
+            keras.layers.BatchNormalization(),
+
+            keras.layers.AveragePooling2D(pool_size=(8, 8)),
             keras.layers.Flatten(),
-            keras.layers.Dense(256, activation='relu'),
-            keras.layers.Dropout(0.5),
-            keras.layers.Dense(64, activation='relu'),
-            keras.layers.BatchNormalization(),
-            keras.layers.Dense(10)
+            keras.layers.Dense(10, activation='softmax')
         ])
         return model
 
     def run(self, predictors, targets, epochs=80, batch_size=64):
-        self.datagen.fit(predictors)
-        if(self.proto):
-            self.model.fit_generator(self.datagen.flow(predictors, targets, batch_size=batch_size),
-                epochs=epochs, callbacks=[self.earlystop_callback])
-        else:
-            self.model.fit_generator(self.datagen.flow(predictors, targets, batch_size=batch_size),
-                epochs=epochs)
+        # self.datagen.fit(predictors)
+        # if(self.proto):
+        #     self.model.fit(self.datagen.flow(predictors, targets, batch_size=batch_size),
+        #         steps_per_epoch=len(predictors)/batch_size, epochs=epochs, callbacks=[self.earlystop_callback, self.tensorboard_callback])
+        # else:
+        #     self.model.fit(self.datagen.flow(predictors, targets, batch_size=batch_size),
+        #         epochs=epochs)
+        self.model.fit(predictors, targets, epochs=epochs, callbacks=[self.earlystop_callback, self.tensorboard_callback])
 
     def evaluate(self, predictors, targets, verbosity=2):
         loss, acc = self.model.evaluate(predictors, targets,
