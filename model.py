@@ -100,7 +100,7 @@ class Model(object):
                 steps_per_epoch=len(predictors)/batch_size, epochs=epochs, callbacks=[self.earlystop_callback, self.tensorboard_callback])
         else:
             self.model.fit(self.datagen.flow(predictors, targets, batch_size=batch_size),
-                epochs=epochs)
+                steps_per_epoch=len(predictors)/batch_size, epochs=epochs, callbacks=[self.tensorboard_callback])
         # self.model.fit(predictors, targets, epochs=epochs, callbacks=[self.earlystop_callback, self.tensorboard_callback])
 
     def evaluate(self, predictors, targets, verbosity=2):
@@ -115,6 +115,6 @@ class Model(object):
         df.index.name = 'Id'
         return df
 
-    def write_predictions(self, df, file):
+    def write_predictions(self, df):
         file = "predictions-" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"
         df.to_csv(file, index=True, header=True)

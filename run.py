@@ -31,7 +31,7 @@ def main(proto=False):
 
     predictions = model.predict(data)
 
-    model.write_predictions(predictions, "out.csv")
+    model.write_predictions(predictions)
 
 if __name__ == '__main__':
     main(False)
