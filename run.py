@@ -17,7 +17,7 @@ def main(proto=False):
     test_images = reshape(test_images)
 
     model = Model(proto=proto)
-    model.run(train_images, train_labels)
+    model.run(train_images, train_labels, val_predictors=test_images, val_targets=test_labels)
     test_loss, test_acc = model.evaluate(test_images, test_labels)
 
     notifier.end()
@@ -34,4 +34,4 @@ def main(proto=False):
     model.write_predictions(predictions)
 
 if __name__ == '__main__':
-    main(False)
+    main()
