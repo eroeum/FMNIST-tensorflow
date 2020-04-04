@@ -13,7 +13,7 @@ class Model(object):
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
         self.model = self.build_model()
-        self.model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=0.0001, decay=1e-6),
+        self.model.compile(optimizer='adam',
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
             metrics=['accuracy'])
         if(proto):
